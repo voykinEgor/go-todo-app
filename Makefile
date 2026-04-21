@@ -64,3 +64,7 @@ port-forward-up:
 
 port-forward-down:
 	@docker compose down
+
+
+todoapp-run:
+	@go run cmd/todoapp/main.go
