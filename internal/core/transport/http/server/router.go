@@ -1,0 +1,36 @@
+package core_server
+
+import (
+	"fmt"
+	"net/http"
+)
+
+type ApiVersion string
+
+var (
+	ApiVersion1 = ApiVersion("v1")
+	ApiVersion2 = ApiVersion("v2")
+	ApiVersion3 = ApiVersion("v3")
+)
+
+type ApiVersionRouter struct {
+	*http.ServeMux
+	apiVerstion ApiVersion
+}
+
+func NewApiVersionRouter(
+	apiVersion ApiVersion,
+) *ApiVersionRouter {
+	return &ApiVersionRouter{
+		http.NewServeMux(),
+		apiVersion,
+	}
+}
+
+func (r *ApiVersionRouter) RegisterRoutes(routes ...Route) {
+	for _, route := range routes {
+		pattern := fmt.Sprintf("%s %s", route.Method, route.Path)
+
+		r.Handle(pattern, route.Handler)
+	}
+}
