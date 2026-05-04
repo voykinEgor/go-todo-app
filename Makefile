@@ -67,4 +67,7 @@ port-forward-down:
 
 
 todoapp-run:
-	@go run cmd/todoapp/main.go
+	@export LOGGER_FOLDER=$(ROOT_PROJECT)/out/logs && \
+	export POSTGRES_HOST=localhost && \
+	go mod tidy && \
+	go run cmd/todoapp/main.go

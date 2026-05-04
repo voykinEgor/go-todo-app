@@ -1,6 +1,7 @@
 package core_logger
 
 import (
+	"context"
 	"fmt"
 	"os"
 	"path/filepath"
@@ -66,4 +67,12 @@ func (l *Logger) Close() {
 	if err := l.file.Close(); err != nil {
 		fmt.Println("failed closed logfile: ", err)
 	}
+}
+
+func FromContext(ctx context.Context) *Logger {
+	log, ok := ctx.Value("log").(*Logger)
+	if !ok || log == nil {
+		return nil
+	}
+	return log
 }
