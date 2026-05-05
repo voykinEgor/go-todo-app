@@ -15,6 +15,10 @@ type UserRepository interface {
 		ctx context.Context,
 		user domain.User,
 	) (domain.User, error)
+
+	GetUsers(
+		ctx context.Context,
+	) ([]domain.User, error)
 }
 
 func NewuserService(

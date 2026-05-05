@@ -37,7 +37,7 @@ func (h *HTTPServer) RegisterAPIRouters(routers ...*ApiVersionRouter) {
 
 		h.mux.Handle(
 			prefix+"/",
-			http.StripPrefix(prefix+"/", router),
+			http.StripPrefix(prefix, router),
 		)
 	}
 }
