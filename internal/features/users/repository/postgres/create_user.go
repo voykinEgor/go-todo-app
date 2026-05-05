@@ -14,7 +14,7 @@ func (r *UsersRepository) CreateUser(
 	ctx, cancel := context.WithTimeout(ctx, r.pool.GetOperationTimeout())
 	defer cancel()
 
-	query := `INSERT INTO todoapp.users (full_name, phone_number)
+	query := `INSERT INTO todo.users (full_name, phone_number)
 	VALUES ($1, $2)
 	RETURNING id, version, full_name, phone_number;
 	`

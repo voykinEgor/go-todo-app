@@ -51,7 +51,7 @@ func (h *HTTPResponseHandler) ErrorResponse(err error, msg string) {
 		statusCode = http.StatusConflict
 		logFunc = h.log.Warn
 	case errors.Is(err, core_errors.ErrInvalidArgument):
-		statusCode = http.StatusConflict
+		statusCode = http.StatusBadRequest
 		logFunc = h.log.Warn
 	default:
 		statusCode = http.StatusInternalServerError
