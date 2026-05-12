@@ -1,27 +1,29 @@
 package user_transport_http
 
 import (
+	"fmt"
 	"net/http"
 
-	"gitlab.com/voykinEgor/gorestapi/internal/core/domain"
 	core_logger "gitlab.com/voykinEgor/gorestapi/internal/core/logger"
 	core_response "gitlab.com/voykinEgor/gorestapi/internal/core/transport/http/response"
+	core_utils "gitlab.com/voykinEgor/gorestapi/internal/core/transport/http/utils"
 )
 
-type UserGetResponse struct {
-	ID          int     `json:"id"`
-	Version     int     `json:"version"`
-	FullName    string  `json:"full_name"`
-	PhoneNumber *string `json:"phone_number"`
-}
+type UserGetResponse UserResponse
 
 func (h *UsersHttpHandler) GetUsers(rw http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
 	logger := core_logger.FromContext(ctx)
 	responseHandler := core_response.NewHTTPResponseHandler(logger, rw)
-	logger.Debug("invoke GetUsers handler")
 
-	users, err := h.usersService.GetUsers(ctx)
+	limit, offset, err := getLimitOffsetQueryParam(r)
+
+	if err != nil {
+		responseHandler.ErrorResponse(err, "failed to get 'limit'/'offset' query param")
+		return
+	}
+
+	users, err := h.usersService.GetUsers(ctx, limit, offset)
 
 	if err != nil {
 		responseHandler.ErrorResponse(err, "failed to get users")
@@ -33,18 +35,16 @@ func (h *UsersHttpHandler) GetUsers(rw http.ResponseWriter, r *http.Request) {
 	responseHandler.JSONResponse(response, http.StatusOK)
 }
 
-func usersDtoFromDomain(users []domain.User) []UserGetResponse {
-	result := make([]UserGetResponse, 0, len(users))
-
-	for _, u := range users {
-		dto := UserGetResponse{
-			ID:          u.ID,
-			Version:     u.Version,
-			FullName:    u.FullName,
-			PhoneNumber: u.PhoneNumber,
-		}
-		result = append(result, dto)
+func getLimitOffsetQueryParam(r *http.Request) (*int, *int, error) {
+	limit, err := core_utils.GetQueryParam(r, "limit")
+	if err != nil {
+		return nil, nil, fmt.Errorf("get 'limit' query param: %w", err)
 	}
 
-	return result
+	offset, err := core_utils.GetQueryParam(r, "offset")
+	if err != nil {
+		return nil, nil, fmt.Errorf("get 'offset' query param: %w", err)
+	}
+
+	return limit, offset, nil
 }

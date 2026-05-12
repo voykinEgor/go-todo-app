@@ -20,6 +20,8 @@ type UsersService interface {
 
 	GetUsers(
 		ctx context.Context,
+		limit *int,
+		offset *int,
 	) ([]domain.User, error)
 }
 
