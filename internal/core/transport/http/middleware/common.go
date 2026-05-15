@@ -75,6 +75,7 @@ func Trace() Middleware {
 			log.Debug(
 				">>> incoming http request",
 				zap.Time("time", timeRequest),
+				zap.String("http_method", r.Method),
 			)
 
 			next.ServeHTTP(responseWriter, r)

@@ -9,39 +9,42 @@ import (
 
 func (r *UsersRepository) GetUsers(
 	ctx context.Context,
+	limit *int,
+	offset *int,
 ) ([]domain.User, error) {
 	ctx, cancel := context.WithTimeout(ctx, r.pool.GetOperationTimeout())
 	defer cancel()
 
-	query := `SELECT * FROM todo.users`
+	query := `
+	SELECT * 
+	FROM todo.users 
+	ORDER BY id ASC
+	LIMIT $1
+	OFFSET $2`
 
-	rows, err := r.pool.Query(ctx, query)
+	rows, err := r.pool.Query(ctx, query, limit, offset)
 
 	if err != nil {
 		return nil, fmt.Errorf("exec sql script error: %w", err)
 	}
 	defer rows.Close()
 
-	var usersList []domain.User
+	var usersList []UserModel
 
 	for rows.Next() {
-		var id, version int
-		var full_name string
-		var phone_number *string
-
-		if err := rows.Scan(&id, &version, &full_name, &phone_number); err != nil {
+		var userModel UserModel
+		if err := rows.Scan(&userModel.ID, &userModel.Version, &userModel.FullName, &userModel.PhoneNumber); err != nil {
 			return nil, fmt.Errorf("scan error: %w", err)
 		}
 
-		user := domain.User{
-			ID:          id,
-			FullName:    full_name,
-			Version:     version,
-			PhoneNumber: phone_number,
-		}
-
-		usersList = append(usersList, user)
+		usersList = append(usersList, userModel)
 	}
 
-	return usersList, nil
+	if err := rows.Err(); err != nil {
+		return nil, fmt.Errorf("next rows: %w", err)
+	}
+
+	userDomains := userDomainsFromUserModels(usersList)
+
+	return userDomains, nil
 }
